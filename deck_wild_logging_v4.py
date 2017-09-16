@@ -4,18 +4,21 @@
 # program needs Cards_gif to get card images and Probability1Wild.csv
 #TODO-cl use IDE - pycharm
 #TODO-cl use Github for version control
-#TODO-cl use logging
+#DONE use logging - added 9-16-2017
 #TODO-cl use more object-oriented
 #TODO-cl use unittest
 #TODO-cl use machine learning
 #TODO-pl improve performance
 #TODO-pl branch to Pyramid Poker
-#TODO-pl create output which stores cards and results only
+#DONE create output which stores cards and results only - done 09-16-2017
 #TODO-pl merge Interactive and Batch
 #TODO-pl performance testing
 #TODO-pl clean up code in general
 #TODO-pl change "Probability0Wild.csv" file at runtime
 #TODO-pl put key variables into PARAMETERS
+#DONE move Wild Card logic into deck_wild_logging - done 09-16-2017
+#TODO-pl fix "invalid hands"
+#TODO-pl fix sometimes best_wild_card is not in best_wild_hand
 import time
 from Tkinter import *
 import sys
@@ -24,6 +27,10 @@ import csv
 import logging
 logging.basicConfig(format='%(asctime)s:%(levelno)s:%(funcName)s:%(message)s',
                     filemode="w", filename= "russian-output.txt", level=logging.WARN)
+
+#PARAMETERS
+NUMBER_OF_WILD_CARDS = 1
+
 
 f = open ('card_list2.csv', 'w')
 prob_file = False
@@ -45,7 +52,8 @@ class Deck(object):
   
   def deal(self, n):
     deck = [s+r for s in Deck.suit for r in Deck.rank]
-    #deck.append("WX")
+    for i in range(NUMBER_OF_WILD_CARDS):
+        deck.append("wild")
     for i in range(1):
         shuffle(deck)
     return [Hand(deck[i::n]) for i in xrange(n)]
@@ -154,6 +162,42 @@ def analyze (card_list):
 ##        print i, suit_rank_array[i], len(suit_rank_array[i])
               
     return (suit_rank_array)
+
+def best13_with_wild(card_list2):
+    wild_card_present = False
+    wild_card = "N/A"
+
+    for cardx in card_list2:
+        if cardx == "wild":
+            wild_card_present = True
+            card_list2.remove("wild")
+
+    if wild_card_present == True:
+        # print "wild card", wild_card_index
+        # loop through all 52 cards
+        wild_list = [s + r for s in "SHDC" for r in "23456789TJQKA"]
+        best_wild_hand_score = 0
+        best_wild_card_score = [0, 0, 0, 0, 0]
+        best_wild_card = ""
+        for wild_card in wild_list:
+            card_list2.append(wild_card)
+            # print "After wild", card_list2
+            card_list1, best_hand_score = best_13card_hand(card_list2)
+            # print wild_card, best_hand_score[0], best_hand_score[1], best_hand_score[2], best_hand_score[3]
+            if best_hand_score[3] > best_wild_hand_score:
+                best_wild_card_score = best_hand_score[0:4]
+                best_wild_hand_score = best_hand_score[3]
+                best_wild_card = wild_card
+                # print best_wild_card, best_wild_hand_score
+            # print "After best_13card", card_list1
+            # print wild_card, best_hand_score
+            card_list2.remove(wild_card)
+        # print "best_wild_card", best_wild_card, best_wild_card_score
+        best_hand_score = best_wild_card_score
+    else:
+        card_list1, best_hand_score = best_13card_hand(card_list2)
+        best_wild_card = "no"
+    return [best_wild_card, card_list1, best_hand_score]
 
 def best_13card_hand(card_list2):
     card_list = list(card_list2)
