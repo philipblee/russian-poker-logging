@@ -2,15 +2,28 @@
 # each time you click the canvas
 # this program runs in python27
 # program needs Cards_gif to get card images and Probability1Wild.csv
-
+#TODO-cl use IDE - pycharm
+#TODO-cl use Github for version control
+#TODO-cl use logging
+#TODO-cl use more object-oriented
+#TODO-cl use unittest
+#TODO-cl use machine learning
+#TODO-pl improve performance
+#TODO-pl branch to Pyramid Poker
+#TODO-pl create output which stores cards and results only
+#TODO-pl merge Interactive and Batch
+#TODO-pl performance testing
+#TODO-pl clean up code in general
+#TODO-pl change "Probability0Wild.csv" file at runtime
+#TODO-pl put key variables into PARAMETERS
 import time
 from Tkinter import *
 import sys
 from random import shuffle
 import csv
 import logging
-
-logging.basicConfig(format='%(levelno)s:%(funcName)s:%(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s:%(levelno)s:%(funcName)s:%(message)s',
+                    filemode="w", filename= "russian-output.txt", level=logging.WARN)
 
 f = open ('card_list2.csv', 'w')
 prob_file = False
@@ -278,6 +291,7 @@ def best_13card_hand(card_list2):
 
     # Find best_hand based on total_score
     best_total_score = 0
+    best_hand_score = [0,0], [0,0], [0,0], 0
     best_hand = 0
     for i in range(hand_num):
         total_score = round(score_array[3][i][1] + score_array[2][i][1] + score_array[1][i][1],3)
@@ -468,6 +482,7 @@ def best_hand3(card_list2):
 
 def best_hand2(card_listx, score_prob):
     ##logger.debug('Entering module')
+
     """ Given card_listx, return hand_x which is best 5 card hand"""
     logging.info ((card_listx, score_prob))
     previous_hand_score = score_prob[0]
@@ -623,10 +638,14 @@ def best_hand2(card_listx, score_prob):
             card_id.append(pairs_list[-2])
             logging.info(("2 pairs of 3 pairs", card_id))
 
-    elif (len(pairs_list) == 2 or len(pairs_list) == 1) and previous_hand_score > lowest_pair_score:
+    elif (len(pairs_list) == 2) and previous_hand_score > lowest_pair_score:
             logging.info(("pairs_list", pairs_list))
             card_id.append(pairs_list[0])
-            
+
+    elif (len(pairs_list) == 1) and previous_hand_score > lowest_pair_score:
+            logging.info(("pairs_list", pairs_list))
+            card_id.append(pairs_list[0])
+
     elif len(singles_list) >= 1 and previous_hand_score >= lowest_highcard_score:
         for single in singles_list:
             card_id.append(single)

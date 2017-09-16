@@ -8,7 +8,7 @@ from random import shuffle
 from collections import Counter 
 
 #import logging
-#logging.basicConfig(format='%(levelname)s:%(lineno)d:%(message)s', level=logging.DEBUG)
+#logging.basicConfig(format='%(levelname)s:%(lineno)d:%(message)s', level=logging.INFO)
 
 root = Tk()
 f = open ('card_list2.csv', 'w')
