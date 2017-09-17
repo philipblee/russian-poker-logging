@@ -2,35 +2,38 @@
 # each time you click the canvas
 # this program runs in python27
 # program needs Cards_gif to get card images and Probability1Wild.csv
-#TODO-cl use IDE - pycharm
-#TODO-cl use Github for version control
-#DONE use logging - added 9-16-2017
+#DONE use IDE - started using PyCharm 09-13-2017
+#DONE started using Github 09-09-2017
+#DONE use logging - added 09-16-2017
 #TODO-cl use more object-oriented
 #TODO-cl use unittest
 #TODO-cl use machine learning
 #TODO-pl improve performance
 #TODO-pl branch to Pyramid Poker
 #DONE create output which stores cards and results only - done 09-16-2017
-#TODO-pl merge Interactive and Batch
+#TODO-pl merge Interactive and Batch - started this in Russian_Poker
 #TODO-pl performance testing
 #TODO-pl clean up code in general
-#TODO-pl change "Probability0Wild.csv" file at runtime
-#TODO-pl put key variables into PARAMETERS
+#DONE change "Probability0Wild.csv" file at runtime - done 09-16-2017
+#TODO-pl put key variables into PARAMETERS - started 09-16-2017
 #DONE move Wild Card logic into deck_wild_logging - done 09-16-2017
 #TODO-pl fix "invalid hands"
 #TODO-pl fix sometimes best_wild_card is not in best_wild_hand
+#TODO-pl show 13 cards, let user arrange 3 hands, then provide score and best hand with score
 import time
 from Tkinter import *
 import sys
 from random import shuffle
 import csv
 import logging
-logging.basicConfig(format='%(asctime)s:%(levelno)s:%(funcName)s:%(message)s',
-                    filemode="w", filename= "russian-output.txt", level=logging.WARN)
 
 #PARAMETERS
-NUMBER_OF_WILD_CARDS = 1
-
+logging.basicConfig(format='%(asctime)s:%(levelno)s:%(funcName)s:%(message)s',
+                    filemode="w", filename= "russian-output.txt", level=logging.INFO)
+NUMBER_OF_WILD_CARDS = 0
+PROBABILITY_FILE = "Probability" + str(NUMBER_OF_WILD_CARDS) + "Wild.csv"
+logging.info(PROBABILITY_FILE)
+first_time_deal = True
 
 f = open ('card_list2.csv', 'w')
 prob_file = False
@@ -51,12 +54,15 @@ class Deck(object):
   rank = 'AKQJT98765432'
   
   def deal(self, n):
-    deck = [s+r for s in Deck.suit for r in Deck.rank]
-    for i in range(NUMBER_OF_WILD_CARDS):
-        deck.append("wild")
-    for i in range(1):
-        shuffle(deck)
-    return [Hand(deck[i::n]) for i in xrange(n)]
+     global first_time_deal
+     global deck
+     if first_time_deal == True:
+        deck = [s+r for s in Deck.suit for r in Deck.rank]
+        for i in range(NUMBER_OF_WILD_CARDS):
+            deck.append("wild")
+        first_time_deal = False
+     shuffle(deck)
+     return [Hand(deck[i::n]) for i in xrange(n)]
 
   @staticmethod
   def cmpkey(card):
@@ -80,6 +86,7 @@ def straightcount (rankcount):
         for j in range (0,5):
             if rankcount[i+j] == 0:
                 straightct[i] = 0
+                break
     straightct[15] = sum(straightct[1:11])
     return (straightct)
 
@@ -1033,6 +1040,7 @@ def score_final(card_listx, hand):
     elif hand == "1":
         if score >= 40000:
             prob = prob * 3
+    prob = round(prob,2)
     #print "debug score 1", score, hand, prob
     #print "score", card_listx, score
     return ([score, prob])
@@ -1043,7 +1051,7 @@ def win_prob(score, hand):
     global prob_array
     global prob_hand
     if prob_file is False:
-        with open("probability0wild.csv","rb") as f:
+        with open(PROBABILITY_FILE,"rb") as f:
             reader = csv.reader(f)
             x = list(reader)
         prob_file = True
