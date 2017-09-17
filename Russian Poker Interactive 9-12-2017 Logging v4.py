@@ -5,12 +5,9 @@ from deck_wild_logging_v4 import *
 from Tkinter import *
 import random
 from random import shuffle
-from collections import Counter 
 
-#import logging
-#logging.basicConfig(format='%(levelname)s:%(lineno)d:%(message)s', level=logging.INFO)
 #TODO-pl let user set up his cards to compare with program
-pass
+
 def create_images():
     """create all card images as a card_name:image_object dictionary"""
     global image_dict
@@ -22,7 +19,7 @@ def create_images():
         for card in card_list:
             # all images have filenames the match the card_list names + extension .gif
             image_dict[card] = PhotoImage(file=image_dir+card+".gif")
-            #print image_dir+card+".gif"  # test
+            # print image_dir+card+".gif"  # test
         image_dict["Deck3"] = PhotoImage(file=image_dir+"Deck3"+".gif")
         first_time_images = False
     return image_dict
@@ -37,7 +34,7 @@ image_dir = "Cards_gif/"
 
 if BATCH == True:
     root = Tk()
-    card_list_string = "c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,x,h3,p3,h2,p2,h1,p1,total\n"
+    card_list_string = "w,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,  h3,  p3,   h2, p2,   h1, p1,   total\n"
     # print card_list_string
     with open("card_list2.csv", "w") as f:
         f.write(card_list_string)
@@ -63,20 +60,12 @@ def next_hand(event):
 
     root.title(card_list)  # test
 
-    ###########################################################
-    ################### program begins  #######################
-    ###########################################################
     start_time = time.time()
     card_list2 = list (card_list[0:NUMBER_OF_CARDS])  #deal NUMBER_OF_CARDS
     card_list3 = list (sorted(card_list2[0:NUMBER_OF_CARDS]))
 
-
-    # for i in card_list2:
-    #     card_list2_string = card_list2_string + i+ ","
     card_list2_string = ", ".join(card_list2)
-    print card_list2_string
     logging.info(card_list2_string)
-
     best_wild_card, best_card_list1, best_hand_score = best13_with_wild(card_list2)
     card_list_string = best_wild_card + ", "
     score3, score2, score1, score4 = best_hand_score[0], best_hand_score[1], best_hand_score[2], best_hand_score[3]
@@ -85,7 +74,7 @@ def next_hand(event):
     card_list_string += str(score3[0]) + ", " + str(score3[1]) + ", "
     card_list_string += str(score2[0]) + ", " + str(score2[1]) + ", "
     card_list_string += str(score1[0]) + ", " + str(score1[1]) + ", " + str(score4) + "\n"
-
+    print card_list_string
     with open("card_list2.csv","a") as f:
         f.write(card_list_string)
 
@@ -102,7 +91,7 @@ def next_hand(event):
     j = 0
     end_time = time.time()
     lapse_time = end_time - start_time
-    print "finished", lapse_time
+    print "finished", start_time, end_time, lapse_time
     for i in range(1):
         #if invalid_hand[i] == False:  # and i == best_hand:
         x = 10

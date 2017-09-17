@@ -29,13 +29,13 @@ import logging
 
 #PARAMETERS
 logging.basicConfig(format='%(asctime)s:%(levelno)s:%(funcName)s:%(message)s',
-                    filemode="w", filename= "russian-output.txt", level=logging.INFO)
+                    filemode="w", filename="russian-output.txt", level=logging.CRITICAL)
 NUMBER_OF_WILD_CARDS = 0
 PROBABILITY_FILE = "Probability" + str(NUMBER_OF_WILD_CARDS) + "Wild.csv"
 logging.info(PROBABILITY_FILE)
 first_time_deal = True
 
-f = open ('card_list2.csv', 'w')
+#f = open('card_list2.csv', 'w')
 prob_file = False
 prob_chart = [0,0,0]
 prob_chart = 1200 * [prob_chart]
@@ -56,7 +56,7 @@ class Deck(object):
   def deal(self, n):
      global first_time_deal
      global deck
-     if first_time_deal == True:
+     if first_time_deal:
         deck = [s+r for s in Deck.suit for r in Deck.rank]
         for i in range(NUMBER_OF_WILD_CARDS):
             deck.append("wild")
@@ -81,13 +81,15 @@ def straightcount (rankcount):
         finally straightct [15] = total number of straights
         used mainly by analyze()"""
     straightct = 16 * [0]
-    for i in range(1,11):
-        straightct [i] = 1
-        for j in range (0,5):
-            if rankcount[i+j] == 0:
-                straightct[i] = 0
-                break
-    straightct[15] = sum(straightct[1:11])
+    if sum(rankcount) >= 5:
+        straightct [1:11] = 10 * [0]
+        for i in range(1,11):
+            straightct [i] = 1
+            for j in range (0,5):
+                if rankcount[i+j] == 0:
+                    straightct[i] = 0
+                    break
+        straightct[15] = sum(straightct[1:11])
     return (straightct)
 
 def analyze (card_list):
@@ -179,7 +181,7 @@ def best13_with_wild(card_list2):
             wild_card_present = True
             card_list2.remove("wild")
 
-    if wild_card_present == True:
+    if wild_card_present:
         # print "wild card", wild_card_index
         # loop through all 52 cards
         wild_list = [s + r for s in "SHDC" for r in "23456789TJQKA"]
@@ -336,7 +338,7 @@ def best_13card_hand(card_list2):
             is_valid_hand = False
         if score_array[2][i][0] > score_array[3][i][0]:
             is_valid_hand = False
-        if is_valid_hand == False:
+        if not is_valid_hand:
             valid_hand[i] = False  # marks valid_hand{i] False
             logging.warning(("Invalid Hand", i, score_array[3][i], score_array[2][i], score_array[1][i]))
 
@@ -657,7 +659,7 @@ def best_hand2(card_listx, score_prob):
     elif straights > 0 and previous_hand_score >= lowest_straight_score:
         straight_found = False
         for j in range (11,0,-1):   #straight
-            if straight_found == False:
+            if not straight_found:
                 if suit_rank_array[5][j] >= 1:
                     straight_found = True
                     for k in range (5):
@@ -813,17 +815,17 @@ def flush_overage (card_listx, card_list2):
         #print "pairs", suit_rank_array[11]
         if len(suit_rank_array[11]) > 0 and found == False: # if there are Pairs 
              for cardx in card_listx:
-                  if found == False:
+                  if not found:
                       for y in suit_rank_array[11]:
                           #print "y, cardx", y, cardx
                           if y in cardx:
                               found = True
                               flush_overage_card = cardx
-        if found == False:
+        if not found:
             flush_overage_card = card_listx[0]
             found = True
             
-        if found == True:
+        if found:
             card_listx.remove(flush_overage_card)
             flush_overage_card = ""
             found = False
@@ -832,7 +834,6 @@ def flush_overage (card_listx, card_list2):
     return card_listx
 
 def score(card_listx, hand):
-    #logger.debug('Entering module')
     """ given 1-5 cards, returns initial score and prob depending on hand 1,2 or 3"""
     suit_rank_array = analyze (card_listx)
     suits = "SHDC"

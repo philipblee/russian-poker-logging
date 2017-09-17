@@ -6,9 +6,6 @@ from deck_wild_logging_v4 import *
 from Tkinter import *
 from random import *
 
-###########################################################
-################### program begins  #######################
-###########################################################
 start_time = time.time()
 f = open ('card_list2.csv', 'w')
 card_list_string = "c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,x,h3,p3,h2,p2,h1,p1,total\n"
@@ -17,7 +14,7 @@ with open("card_list2.csv", "w") as f:
     f.write(card_list_string)
 
 #PARAMETERS
-NUMBER_OF_HANDS = 200
+NUMBER_OF_HANDS = 1000
 
 for k in range (NUMBER_OF_HANDS):
     if k%10 == 0:
@@ -41,16 +38,8 @@ for k in range (NUMBER_OF_HANDS):
     card_list_string += str(score4) + "\n"
     #print card_list_string
 
-    #print card_list_string
-####    for i in range (2,-1,-1):
-####         #print "i, j, score_array[i][best_hand]", i, j, score_array[i][best_hand]
-####         card_list_string += str(best_hand_score[i]) + ", "
-##    card_list_string += str(best_hand_score) + "\n"
-##    #print card_list_string
     with open("card_list2.csv","a") as f:
         f.write(card_list_string)
-    f.close()
-
 end_time = time.time()
 lapse_time = end_time - start_time
 print "finished", lapse_time, lapse_time/NUMBER_OF_HANDS
