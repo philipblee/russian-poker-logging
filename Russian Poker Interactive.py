@@ -1,9 +1,9 @@
 # using Tkinter to display a hand of 13 random card images
 # each time you click the canvas
 
-from deck_wild_logging_v4 import *
+from deck import *
 from Tkinter import *
-import random
+#import random
 from random import shuffle
 
 #TODO-pl let user set up his cards to compare with program
@@ -12,9 +12,8 @@ def create_images():
     """create all card images as a card_name:image_object dictionary"""
     global image_dict
     global first_time_images
-    a = Deck().deal(1)[0]
-    card_list = a
     if first_time_images == True:
+        card_list = Deck().deal(1)[0]
         image_dict = {}
         for card in card_list:
             # all images have filenames the match the card_list names + extension .gif
@@ -47,8 +46,9 @@ def next_hand(event):
     if first_time_deck == True:
         a = Deck().deal(4)
         first = False
-    logging.info ("\n\n=========== New Hand ===============\n")
+    logging.info ("\n=========== New Hand ===============\n")
     card_list = a[0]
+    print card_list
     # now display the card images at the proper location on the canvas
     x = 10
     y = 10
@@ -128,7 +128,8 @@ canvas1.pack()
 image_dict = create_images()
 #print image_dict  # test
 
-# best_hand_dict ={"8": "Straight Flush", "7": "Four of a Kind",
+# best_hand_dict ={"9": "Five of a Kind",
+#                  "8": "Straight Flush", "7": "Four of a Kind",
 #                  "6": "Full House", "5": "Flush", "4": "Straight",
 #                  "3": "Trips", "2": "Two Pairs", "1": "One Pair", "0": "High Card"}
 # bind left mouse click on canvas to next_hand display
