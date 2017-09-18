@@ -22,7 +22,7 @@ for k in range (NUMBER_OF_HANDS):
         print k
     a = Deck().deal_n_cards(NUMBER_OF_CARDS)
     card_list = a[0]
-    print card_list
+    logging.debug((card_list))
     card_list2 = list (card_list[0:13])  #deal number_of_cards
     best_wild_card, best_card_list1, best_hand_score = best13_with_wild(card_list2)
     card_list_string = best_wild_card + ", "

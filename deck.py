@@ -29,7 +29,7 @@ import logging
 
 #PARAMETERS
 logging.basicConfig(format='%(asctime)s:%(levelno)s:%(funcName)s:%(message)s',
-                    filemode="w", filename="russian-output.txt", level=logging.DEBUG)
+                    filemode="w", filename="russian-output.txt", level=logging.CRITICAL)
 NUMBER_OF_WILD_CARDS = 1
 PROBABILITY_FILE = "Probability" + str(NUMBER_OF_WILD_CARDS) + "Wild.csv"
 logging.info(PROBABILITY_FILE)
@@ -1045,7 +1045,8 @@ def score_final(card_listx, hand):
         score = 10000
         if len(card_listx) > 0:
             score += ranks.index(card_listx[0][1]) * 100
-            score += ranks.index(card_listx[1][1])
+            if len(card_listx) > 1:
+                score += ranks.index(card_listx[1][1])
             logging.info(("singles only", card_listx, score))
             
     prob = win_prob(score, hand)
