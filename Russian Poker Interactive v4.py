@@ -1,4 +1,4 @@
-# Russian Poker Interactive v3.py - Takes 4 rows, 2 for hand and answer, 1 for cards, 1 for arranging hand
+# Russian Poker Interactive v4.py - 2 rows, 1 for initial cards that can be re-arranged, 1 for answer
 # using Tkinter to display a hand of 13 random card images
 # each time you click the canvas
 
@@ -6,8 +6,8 @@ from deck import *
 from Tkinter import *
 from random import shuffle
 card_list = []
-#TODO-pl let user set up his cards to compare with program - started 09-18-2017
-
+#DONE - TODO-pl let user set up his cards to compare with program - started 09-18-2017
+#TODO-pl make cards snap into grid
 class Play_Area(Frame):
     '''Illustrate how to drag items on a Tkinter canvas'''
     global card_list
@@ -16,26 +16,26 @@ class Play_Area(Frame):
         Frame.__init__(self, parent)
 
         # create a canvas
-        self.canvas = Canvas(width=1000, height=230)
+        self.canvas = Canvas(width=1000, height=120)
         self.canvas.pack(fill="both", expand=False)
         # top line and bottom line for play_area
         self.canvas.create_line(0, 3, 1170, 3, fill="blue", width=3)
         self.canvas.create_line(0, 115, 1170, 115, fill="blue", width=3)
         # 12 vertical lines for 13 cards
-        self.canvas.create_line(3, 0, 3, 230, fill="blue", width=3)
-        self.canvas.create_line(90, 0, 90, 230, fill="blue", width=1)
-        self.canvas.create_line(180, 0, 180, 230, fill="blue", width=1)
-        self.canvas.create_line(270, 0, 270, 230, fill="blue", width=1)
-        self.canvas.create_line(360, 0, 360, 230, fill="blue", width=1)
-        self.canvas.create_line(450, 0, 450, 230, fill="blue", width=3)
-        self.canvas.create_line(540, 0, 540, 230, fill="blue", width=1)
-        self.canvas.create_line(630, 0, 630, 230, fill="blue", width=1)
-        self.canvas.create_line(720, 0, 720, 230, fill="blue", width=1)
-        self.canvas.create_line(810, 0, 810, 230, fill="blue", width=1)
-        self.canvas.create_line(900, 0, 900, 230, fill="blue", width=3)
-        self.canvas.create_line(990, 0, 990, 230, fill="blue", width=1)
-        self.canvas.create_line(1080, 0, 1080, 230, fill="blue", width=1)
-        self.canvas.create_line(1170, 0, 1170, 230, fill="blue", width=3)
+        self.canvas.create_line(3, 0, 3, 115, fill="blue", width=3)
+        self.canvas.create_line(90, 0, 90, 115, fill="blue", width=1)
+        self.canvas.create_line(180, 0, 180, 115, fill="blue", width=1)
+        self.canvas.create_line(270, 0, 270, 115, fill="blue", width=1)
+        self.canvas.create_line(360, 0, 360, 115, fill="blue", width=1)
+        self.canvas.create_line(450, 0, 450, 115, fill="blue", width=3)
+        self.canvas.create_line(540, 0, 540, 115, fill="blue", width=1)
+        self.canvas.create_line(630, 0, 630, 115, fill="blue", width=1)
+        self.canvas.create_line(720, 0, 720, 115, fill="blue", width=1)
+        self.canvas.create_line(810, 0, 810, 115, fill="blue", width=1)
+        self.canvas.create_line(900, 0, 900, 115, fill="blue", width=3)
+        self.canvas.create_line(990, 0, 990, 115, fill="blue", width=1)
+        self.canvas.create_line(1080, 0, 1080, 115, fill="blue", width=1)
+        self.canvas.create_line(1170, 0, 1170, 115, fill="blue", width=3)
         self.canvas.delete("All")
         # this data is used to keep track of item being dragged
         self._drag_data = {"x": 0, "y": 0, "item": None}
@@ -43,8 +43,9 @@ class Play_Area(Frame):
         # create card images from card_list that can be moved around
         x = 10
         CARD_GAP = 90
+        y = 10
         for card in card_list:
-            self._create_image_token((x, 130), card)
+            self._create_image_token((x, y), card)
             x += CARD_GAP
 
         # add bindings for clicking, dragging and releasing over
@@ -108,24 +109,20 @@ def show_next_hand(event):
     logging.info ("\n=========== New Hand ===============\n")
     card_list = a[0][0:NUMBER_OF_CARDS]
     card_list = sorted(card_list, reverse=True)
-    # for widget in root.winfo_children()
-    #     widget.destroy()
     Play_Area(root).pack()
     root.title("New Hand")
+    canvas1.delete("All")
 
-    # now clear and display card images on canvas1
-    x = 10
-    y = 10
-    CARD_GAP = 90
-    canvas1.delete("all")
-
-    card_list3 = sorted(card_list, reverse = True)
-    for card in card_list3:  #all cards
-        canvas1.create_image(x, y, image=image_dict[card], anchor=NW)
-        x += CARD_GAP
-
-
-    
+    # # now clear and display card images on canvas1
+    # x = 10
+    # y = 10
+    # CARD_GAP = 90
+    # canvas1.delete("all")
+    #
+    # card_list3 = sorted(card_list, reverse = True)
+    # for card in card_list3:  #all cards
+    #     canvas1.create_image(x, y, image=image_dict[card], anchor=NW)
+    #     x += CARD_GAP
 
 def show_best_hand(event):
     """ Given card_list, find the best hand and show scoring"""
@@ -169,17 +166,16 @@ def show_best_hand(event):
     root.title("Solved")
     card_list3 = sorted(card_list, reverse=True)
 
-    for card in card_list3:
-        canvas1.create_image(x, y, image=image_dict[card], anchor=NW)
-        x += CARD_GAP
-    canvas1.create_line(0,230,1400,230,fill="blue", width = 3)
-
+    # for card in card_list3:
+    #     canvas1.create_image(x, y, image=image_dict[card], anchor=NW)
+    #     x += CARD_GAP
+    # canvas1.create_line(0,115,1400,115,fill="blue", width = 3)
     #card_list2 = list(card_list)
     j = 0
 
     for i in range(1):
         x = 10
-        y = 120 * (j + 1)
+        y = 10 * (j + 1)
         j += 1
         for card in best_card_list1[0:5]:  # hand3
             canvas1.create_image(x, y, image=image_dict[card], anchor=NW)
@@ -224,11 +220,9 @@ photo1 = PhotoImage(file=image_dir+"C2.gif")
 width1 = (NUMBER_OF_CARDS + 2) * photo1.width() + 400
 
 #height1 = 2 * photo1.height() + 40
-height1 = 2 * photo1.height() + 40
-
+height1 = 1 * photo1.height() + 40
 canvas1 = Canvas(width=width1, height=height1)
 canvas1.pack()
-
 # now load all card images into a dictionary
 image_dict = create_images()
 

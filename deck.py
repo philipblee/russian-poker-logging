@@ -102,6 +102,13 @@ def rank_sort(a,b):
     if rank.index(a[1]) > rank.index(b[1]):
         return 1
     return -1
+
+def suit_rank_sort(a,b):
+    suit = "CDHSw"
+    rank = "23456789TJQKAi"
+    if suit.index(a[0])*14 + rank.index(a[1]) > suit.index(b[0])*14 + rank.index(b[1]):
+        return 1
+    return -1
   
 def straightcount (rankcount):
     """ count straights - takes in rankcount(list of ranks), and returns straightct
@@ -1024,7 +1031,9 @@ def score_final(card_listx, hand):
 
     elif len(trips_list)>0 and len(pairs_list) == 0:
         score = 40000
-        score += ranks.index(trips_list[0]) * 100
+        score += ranks.index(trips_list[0])
+        if len(card_listx) == 5:
+              score += ranks.index(singles_list[0])
         #print "trips", card_id
                     
     elif len(pairs_list) > 1:
