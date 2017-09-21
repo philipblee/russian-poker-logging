@@ -1,7 +1,7 @@
 # Russian Poker Interactive v6.py - 2 rows, 1 for initial cards that can be re-arranged, 1 for answer
 # using Tkinter to display a hand of 13 random card images
 # each time you click the canvas
-
+# v7 - adds code for snapping to grid, then I will try to merge code
 from deck import *
 from Tkinter import *
 from random import shuffle
@@ -11,11 +11,81 @@ card_list = []
 #DONE 09-19-2017 TODO-pl add space to left of cards
 #DONE 09-19-2017 TODO-pl create rectangle objects below cards to help identify where cards are arranged to
 #DONE 09-19-2017 TODO-pl fix rank_suit_sort by suit.index[a] * 14+ rank.index{a] in deck
+import Tkinter as tk
 
-class Play_Hand(Frame):
+class SnappingCanvas(tk.Canvas):
+    ''' A canvas that bites! ;-)'''
+
+    global card_list
+
+    def __init__(self, master, **kw):
+        self.click = None
+        tk.Canvas.__init__(self, master, **kw)
+        image_dict = create_images()
+        # lay out white rectangles first so they are behind all the cards
+        CARD_GAP = 90
+        Y_OFFSET = 90
+        X_OFFSET = 100
+        x = X_OFFSET
+        tag_number = 1
+        for card in card_list:
+            self.create_rectangle((x - 10, Y_OFFSET - 10, x + CARD_GAP - 10, 195), fill="white", tags=tag_number)
+            x += CARD_GAP
+            tag_number += 1
+
+        self.create_rectangle(0, 0, 80, 97, fill="maroon", tag="R")
+        self.create_rectangle(0, 0, 80, 97, fill="aqua", tag="R")
+        self.create_rectangle(0, 0, 80, 97, fill="purple", tag="R")
+        self.create_rectangle(0, 97, 80, 194, fill="black", tag="R")
+        self.create_rectangle(0, 97, 80, 194, fill="green", tag="R")
+        self.create_rectangle(0, 97, 80, 194, fill="magenta", tag="R")
+        self.create_rectangle(0, 194, 80, 291, fill="orange", tag="R")
+        self.create_rectangle(0, 194, 80, 291, fill="cyan", tag="R")
+        self.create_rectangle(0, 194, 80, 291, fill="pink", tag="R")
+        self.create_rectangle(0, 291, 80, 388, fill="blue", tag="R")
+        self.create_rectangle(0, 291, 80, 388, fill="red", tag="R")
+        self.create_rectangle(0, 291, 80, 388, fill="yellow", tag="R")
+        self.create_rectangle(0, 291, 80, 388, fill="hot pink", tag="R")
+
+        print "snaptogrid", card_list
+
+        # lay out cards on top of the white rectangles
+        x = X_OFFSET
+        for card in card_list:
+            print "snap", x, Y_OFFSET,card, image_dict[card]
+            self.create_image(x, Y_OFFSET, image=image_dict[card], anchor=NW, tags=("token", card))
+            x += CARD_GAP
+
+        self.tag_bind("R", "<Button-1>", self.onClick)
+        self.tag_bind("R", "<B1-Motion>", self.onMotion)
+        self.tag_bind("R", "<ButtonRelease-1>", self.onRelease)
+
+    def onClick(self, event):
+        self.click = event.x, event.y
+        #print self.click
+
+    def onMotion(self, event):
+        x, y = self.click
+        dx = event.x - x
+        dy = event.y - y
+        self.move('current', dx, dy)
+        self.click = event.x, event.y
+        #print self.click
+
+    def onRelease(self, event):
+        mx = event.x//90*90
+        my = event.y//90*90
+        my = 100
+        #print mx, my
+        #mx, my - tells image where to snap into place
+        x, y = mx - (mx % 90), my - (my % 90)
+        self.coords("current", x+10, y-2, x + 70 +10, y + 95)
+
+
+class PlayHand(Frame):
     '''Illustrate how to drag items on a Tkinter canvas'''
     global card_list
-    global first_Play_Hand
+    global first_PlayHand
     def __init__(self, parent):
         Frame.__init__(self, parent)
 
@@ -40,7 +110,8 @@ class Play_Hand(Frame):
         # lay out cards on top of the white rectangles
         x = X_OFFSET
         for card in card_list:
-            self._create_token((x, Y_OFFSET), card)
+            self.canvas.create_image(x, Y_OFFSET, image=image_dict[card], anchor=NW, tags=("token", card))
+            #self._create_token((x, Y_OFFSET), card)
             x += CARD_GAP
         # blue top and bottom lines for play_area
         self.canvas.create_line(90, 3, 1260, 3, fill="blue", width=3)
@@ -106,18 +177,20 @@ def show_player_score(event, *args):
         pass
 
 def reset_hand(event):
-    Play_Hand(root).pack()
+    PlayHand(root).pack()
 
 def create_images():
     """create all card images as a card_name:image_object dictionary"""
     global image_dict
     global first_time_images
+    first_time_images= True
     if first_time_images == True:
         card_list = Deck().deal(1)[0]
         image_dict = {}
         for card in card_list:
             # all images have filenames the match the card_list names + extension .gif
             image_dict[card] = PhotoImage(file=image_dir+card+".gif")
+            print "create_images", card, image_dir + card+ ".gif"
         image_dict["Deck3"] = PhotoImage(file=image_dir+"Deck3"+".gif")
         first_time_images = False
     return image_dict
@@ -134,7 +207,7 @@ def show_next_hand(*args):
     CARD_GAP = 90
     x_place = 954 + 330
     x = x_place
-    Play_Hand(root).pack()
+    PlayHand(root).pack()
     root.title("New Hand")
     # clear out last hand
     canvas1.delete("all")
@@ -266,5 +339,9 @@ image_dict = create_images()
 canvas1.bind('<Button-1>', show_next_hand)
 canvas1.bind('<Button-3>', show_best_hand)
 canvas1.bind('<Button-2>', reset_hand)
+show_next_hand()
+root = tk.Tk()
+snapit = SnappingCanvas(root, width=1500, height=388, bg="white")
+snapit.pack()
 
 root.mainloop()
