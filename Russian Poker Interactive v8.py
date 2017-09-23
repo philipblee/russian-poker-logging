@@ -2,6 +2,7 @@
 # using Tkinter to display a hand of 13 random card images
 # each time you click the canvas
 # v7 - adds code for snapping to grid, then I will try to merge code
+# v8 - experimental, trying to change the base class of PlayHand from Frame to Canvas
 from deck import *
 from Tkinter import *
 from random import shuffle
@@ -21,33 +22,34 @@ class SnaptoGrid(Canvas):
     def __init__(self, master, **kw):
         self.click = None
         Canvas.__init__(self, master, **kw)
-        image_dict = create_images()
+        card_list = ["SA", "HA", "DA", "CA", "S2", "DT", "H5", "S7", "HQ", "D6", "H8", "HJ", "C8"]
         # lay out white rectangles first so they are behind all the cards
+        rectangle_width = 70
+        rectangle_height = 97
         CARD_GAP = 90
-        Y_OFFSET = 90
-        X_OFFSET = 100
+        Y_OFFSET = 30
+        X_OFFSET = 94
         x = X_OFFSET
         tag_number = 1
         for card in card_list:
-            self.create_rectangle((x - 10, Y_OFFSET - 10, x + CARD_GAP - 10, 195), fill="white", tags=tag_number)
+            self.create_rectangle((x - 10, Y_OFFSET - 10, x + CARD_GAP - 10, Y_OFFSET -10 + 115), fill="gray", tags=tag_number)
             x += CARD_GAP
             tag_number += 1
 
-        self.create_rectangle(0, 0, 80, 97, fill="maroon", tag="R")
-        self.create_rectangle(0, 0, 80, 97, fill="aqua", tag="R")
-        self.create_rectangle(0, 0, 80, 97, fill="purple", tag="R")
-        self.create_rectangle(0, 97, 80, 194, fill="black", tag="R")
-        self.create_rectangle(0, 97, 80, 194, fill="green", tag="R")
-        self.create_rectangle(0, 97, 80, 194, fill="magenta", tag="R")
-        self.create_rectangle(0, 194, 80, 291, fill="orange", tag="R")
-        self.create_rectangle(0, 194, 80, 291, fill="cyan", tag="R")
-        self.create_rectangle(0, 194, 80, 291, fill="pink", tag="R")
-        self.create_rectangle(0, 291, 80, 388, fill="blue", tag="R")
-        self.create_rectangle(0, 291, 80, 388, fill="red", tag="R")
-        self.create_rectangle(0, 291, 80, 388, fill="yellow", tag="R")
-        self.create_rectangle(0, 291, 80, 388, fill="hot pink", tag="R")
 
-        print "snaptogrid", card_list
+        self.create_rectangle(0, 0, rectangle_width, rectangle_height, fill="maroon", tag="R")
+        self.create_rectangle(rectangle_width, 0, 2 * rectangle_width, rectangle_height, fill="olive", tag="R")
+        self.create_rectangle(2*rectangle_width, 0, 3 * rectangle_width, rectangle_height, fill="purple", tag="R")
+        self.create_rectangle(3*rectangle_width, 0, 4 * rectangle_width, rectangle_height, fill="black", tag="R")
+        self.create_rectangle(4*rectangle_width, 0, 5*rectangle_width, rectangle_height, fill="green", tag="R")
+        self.create_rectangle(5*rectangle_width, 0,  6*rectangle_width, rectangle_height, fill="magenta", tag="R")
+        self.create_rectangle(6*rectangle_width, 0, 7 *  rectangle_width, rectangle_height, fill="orange", tag="R")
+        self.create_rectangle(7*rectangle_width, 0, 8 *  rectangle_width, rectangle_height, fill="cyan", tag="R")
+        self.create_rectangle(8*rectangle_width, 0, 9 *  rectangle_width, rectangle_height, fill="pink", tag="R")
+        self.create_rectangle(9*rectangle_width, 0, 10 *  rectangle_width, rectangle_height, fill="blue", tag="R")
+        self.create_rectangle(10*rectangle_width, 0, 11 *  rectangle_width, rectangle_height, fill="red", tag="R")
+        self.create_rectangle(11*rectangle_width, 0, 12 *  rectangle_width, rectangle_height, fill="yellow", tag="R")
+        self.create_rectangle(12*rectangle_width, 0, 13 *  rectangle_width, rectangle_height, fill="hot pink", tag="R")
 
         # create cards and lay on top of the white rectangles
         x = X_OFFSET
@@ -75,7 +77,7 @@ class SnaptoGrid(Canvas):
     def onRelease(self, event):
         mx = event.x//90*90
         my = event.y//90*90
-        my = 100
+        my = 60 - 20
         print mx, my
         #mx, my - tells image where to snap into place
         rectangle_x = self.coords("current")[0]
@@ -87,12 +89,11 @@ class SnaptoGrid(Canvas):
         print "how much to move x,y", event.x - mx, event.y-my
         self.move("current", delta_x, delta_y)
 
-class PlayHand(Frame):
+class PlayHand(Canvas):
     '''Illustrate how to drag items on a Tkinter canvas'''
-    global card_list
     global first_PlayHand
     def __init__(self, parent):
-        Frame.__init__(self, parent)
+        Canvas.__init__(self, parent)
 
         # create a canvas
         self.canvas = Canvas(width=1000, height=115)
@@ -101,7 +102,6 @@ class PlayHand(Frame):
         # this data is used to keep track of item being dragged
         self._drag_data = {"x": 0, "y": 0, "item": None}
 
-        # create card images from card_list that can be moved around
         CARD_GAP = 90
         Y_OFFSET = 10
         X_OFFSET = 100
@@ -112,13 +112,8 @@ class PlayHand(Frame):
             self.canvas.create_rectangle((x-10,Y_OFFSET-10, x+CARD_GAP-10,115), fill="white", tags=tag_number)
             x += CARD_GAP
             tag_number += 1
-        # lay out cards on top of the white rectangles
-        x = X_OFFSET
-        for card in card_list:
-            self.canvas.create_image(x, Y_OFFSET, image=image_dict[card], anchor=NW, tags=("token", card))
-            #self._create_token((x, Y_OFFSET), card)
-            x += CARD_GAP
-        # blue top and bottom lines for play_area
+
+        # blue top and bottom lines for play_area first
         self.canvas.create_line(90, 3, 1260, 3, fill="blue", width=3)
         self.canvas.create_line(90, 115, 1260, 115, fill="blue", width=3)
         # 12 vertical lines for 13 cards - width=3 lines to separate hands
@@ -136,6 +131,14 @@ class PlayHand(Frame):
         self.canvas.create_line(1080, 0, 1080, 115, fill="blue", width=1)
         self.canvas.create_line(1170, 0, 1170, 115, fill="blue", width=1)
         self.canvas.create_line(1260, 0, 1260, 115, fill="blue", width=3)
+
+        # create card images from card_list that can be dragged
+        x = X_OFFSET
+        for card in card_list:
+            self.canvas.create_image(x, Y_OFFSET, image=image_dict[card], anchor=NW, tags=("token", card))
+            #self._create_token((x, Y_OFFSET), card)
+            x += CARD_GAP
+
         # add bindings for clicking, dragging and releasing over
         # any object with the "token" tag
         self.canvas.tag_bind("token", "<ButtonPress-1>", self.on_token_press)
@@ -164,12 +167,13 @@ class PlayHand(Frame):
         mx = event.x//90*90
         my = event.y//90*90
         my = 100
-        print mx, my
-        #mx, my - tells image where to snap into place
-        rectangle_x = self.coords("current")[0]
-        rectangle_y = self.coords("current")[1]
-        delta_x = rectangle_x - mx
-        delta_y = rectangle_y - my
+        # print mx, my
+        # mx, my - tells image where to snap into place
+        print self.coords("item")
+        # rectangle_x = self.coords("current")[0]
+        # rectangle_y = self.coords("current")[1]
+        # delta_x = rectangle_x - mx
+        # delta_y = rectangle_y - my
 
 
     def on_token_motion(self, event):
@@ -205,7 +209,7 @@ def create_images():
         for card in card_list:
             # all images have filenames the match the card_list names + extension .gif
             image_dict[card] = PhotoImage(file=image_dir+card+".gif")
-            print "create_images", card, image_dir + card+ ".gif"
+            # print "create_images", card, image_dir + card+ ".gif"
         image_dict["Deck3"] = PhotoImage(file=image_dir+"Deck3"+".gif")
         first_time_images = False
     return image_dict
@@ -325,6 +329,8 @@ first_time_images = True
 image_dir = "Cards_gif/"
 
 root = Tk()
+# frame = Frame(root)
+# bottomframe = Frame(root)
 card_list_string = "w,c1,c2,c3,c4,c5,c6,c7,c8,c9,c10,c11,c12,c13,  h3,  p3,   h2, p2,   h1, p1,   total\n"
 # print card_list_string
 with open("card_list2.csv", "w") as f:
@@ -345,8 +351,8 @@ show_player_score_button = Button(root, text="Show Player Hand Score",
                                     command=show_player_score)
 show_next_hand_button.pack()
 show_best_hand_button.pack()
-show_player_score_button.pack()
-
+#show_player_score_button.pack()
+#frame.pack()
 canvas1.pack()
 
 # now load all card images into a dictionary
@@ -356,7 +362,7 @@ canvas1.bind('<Button-1>', show_next_hand)
 canvas1.bind('<Button-3>', show_best_hand)
 canvas1.bind('<Button-2>', reset_hand)
 
-snapit = SnaptoGrid(root, width=1500, height=388, bg="white")
-# snapit.pack()
+#snapit = SnaptoGrid(root, width=1500, height=170, bg="white")
+#snapit.pack()
 
 root.mainloop()
