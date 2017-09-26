@@ -1,7 +1,5 @@
-# using Tkinter to display a hand of 13 random card images
-# each time you click the canvas
-# this program runs in python27
 # program needs Cards_gif to get card images and Probability1Wild.csv
+
 #DONE use IDE - started using PyCharm 09-13-2017
 #DONE started using Github 09-09-2017
 #DONE use logging - added 09-16-2017
@@ -20,7 +18,8 @@
 #TODO-pl fix "invalid hands"
 #DONE TODO-pl fix sometimes best_wild_card is incorrect
 #DONE 09-22-2017 TODO-pl show 13 cards, let user arrange 3 hands, then provide score and best hand with score
-#TODO-pl fix flush overage code
+#DONE 09-26-2017 TODO-pl fix flush overage code - 6 card
+#TODO-pl fix flush overage code - 7 card
 #TODO-pl need straight overage code - if 6 card straight, which one? also 2 of a card, which one?
 #TODO-pl after Hand3, determine Hand2 based on total score of Hand2 + Hand1
 import time
@@ -32,8 +31,8 @@ import logging
 
 #PARAMETERS
 logging.basicConfig(format='%(asctime)s:%(levelno)s:%(funcName)s:%(message)s',
-                    filemode="w", filename="russian-output.txt", level=logging.DEBUG)
-NUMBER_OF_WILD_CARDS = 1
+                    filemode="w", filename="russian-output.txt", level=logging.WARN)
+NUMBER_OF_WILD_CARDS = 0
 PROBABILITY_FILE = "Probability" + str(NUMBER_OF_WILD_CARDS) + "Wild.csv"
 logging.info(PROBABILITY_FILE)
 first_time_deal = True
@@ -100,13 +99,15 @@ def create_images():
     return image_dict
 
 def rank_sort(a,b):
-    suit = "SHDC"
-    rank = "23456789TJQKA"
-    if rank.index(a[1]) > rank.index(b[1]):
+    """ sorts by rank then suit"""
+    suit = "CDHSw"
+    rank = "23456789TJQKAi"
+    if rank.index(a[1])*10 + suit.index(a[0]) > rank.index(b[1])*10+ suit.index(b[0]):
         return 1
     return -1
 
 def suit_rank_sort(a,b):
+    """ sorts by suit then rank"""
     suit = "CDHSw"
     rank = "23456789TJQKAi"
     if suit.index(a[0])*14 + rank.index(a[1]) > suit.index(b[0])*14 + rank.index(b[1]):
@@ -150,7 +151,7 @@ def analyze (card_list):
                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
                        [],[],[],[],[],[],[],[],[]]
-    #print " 0",
+
     for card in card_list:
         suit_int = suits.index(card[0]) #0:3
         rank_int = ranks.index(card[1]) + 1 #1:14
@@ -169,21 +170,17 @@ def analyze (card_list):
              flushes = flushes + 1
     suit_rank_array[4][15] = flushes #store sum of flushes in [4][15]
     
-    for i in range(4):
+    for i in range(4): # count rank frequency
         for j in range(1,15):
             suit_rank_array[4][j] += suit_rank_array[i][j]
-
-    #print suit_rank_array[4], "rank freq/flush sum"
 
     # 5 card straights
     suit_rank_array[5] = straightcount(suit_rank_array[4])
     no_straight =  True
-    #print suit_rank_array[5], "straights"
 
     # 5 card straight flush
     for i in range (6,10):
         suit_rank_array[i] = straightcount(suit_rank_array[i-6])
-        #print suit_rank_array[i], "SF", suits[i-6]
 
     ranks = "0123456789TJQKA"
     hand_x = []
@@ -244,6 +241,7 @@ def best13_with_wild(card_list2):
     else:
         best_card_list, best_hand_score = best_13card_hand(card_list2)
         best_wild_card = "no"
+    # print "best_wild", best_wild_card, best_hand_score
     return [best_wild_card, best_card_list, best_hand_score]
 
 def best_13card_hand(card_list2):
@@ -299,7 +297,7 @@ def best_13card_hand(card_list2):
                        [], [], [], [], [], [], [], [], [], [], [], [], []]
 
     # for each hand_x in hand3, get hand2 with score and then get hand1
-    hand3 = best_hand3(card_list2)
+    hand3 = best_high_hand(card_list2)
 
     hand_num = 0
     card_z = []
@@ -316,7 +314,7 @@ def best_13card_hand(card_list2):
             logging.info((hand3[hand_num], score_array[3][hand_num]))
             logging.info(("cards_rem - hand2", cards_remaining[hand_num]))
 
-            hand2[hand_num] = best_hand2(cards_remaining[hand_num], score_array[3][hand_num])
+            hand2[hand_num] = best_5card_hand(cards_remaining[hand_num], score_array[3][hand_num])
             score_array[2][hand_num] = score(hand2[hand_num], "2")
             # print "hand2", hand2[hand_num], score_array[2][hand_num]
             for card_x in hand2[hand_num]:
@@ -325,8 +323,8 @@ def best_13card_hand(card_list2):
                         cards_remaining[hand_num].remove(card_x)
             logging.info((hand2[hand_num], score_array[2][hand_num]))
             logging.info(("cards_rem hand1", cards_remaining[hand_num]))
-
-            hand1[hand_num] = best_hand1(cards_remaining[hand_num], score_array[2][hand_num])
+            cards_remaining[hand_num] = sorted(cards_remaining[hand_num], cmp=rank_sort, reverse=True)
+            hand1[hand_num] = best_3card_hand(cards_remaining[hand_num], score_array[2][hand_num])
             for card_x in hand1[hand_num]:
                 for card_y in cards_remaining[hand_num]:
                     if card_x == card_y:
@@ -351,7 +349,6 @@ def best_13card_hand(card_list2):
                 card_z = cards_remaining[hand_num][0]
                 hand3[hand_num].append(card_z)
                 cards_remaining[hand_num].remove(card_z)
-
 
             hand3[hand_num] = sorted(hand3[hand_num], cmp=rank_sort, reverse=True)
             hand2[hand_num] = sorted(hand2[hand_num], cmp=rank_sort, reverse=True)
@@ -387,6 +384,7 @@ def best_13card_hand(card_list2):
     for i in range(hand_num):
         total_score = round(score_array[3][i][1] + score_array[2][i][1] + score_array[1][i][1],3)
         logging.info((i, score_array[3][i][1], score_array[2][i][1], score_array[1][i][1], total_score, valid_hand[i]))
+        # print(i, score_array[3][i][1], score_array[2][i][1], score_array[1][i][1], total_score, valid_hand[i])
         if total_score > best_total_score and valid_hand[i]:
             best_total_score = total_score
             best_hand = i
@@ -403,11 +401,11 @@ def best_13card_hand(card_list2):
     # print card_list_string
 
     card_listx = hand3[best_hand] + hand2[best_hand] + hand1[best_hand]
-    # print "best_hand", card_listx
+    # print "best_13card_hand", best_hand_score
     return [card_listx, best_hand_score]
 
-def best_hand3(card_list2):
-    """ best_hand3 must find all plausible hand3's by hand type in order
+def best_high_hand(card_list2):
+    """ best_high_hand must find all plausible hand3's by hand type in order
         5K's, SF's, 4K's, FH's, Flushes', Straights', Trip's, 2Ps and P's.
         Each one creates a new hand3[hand_num]
     """
@@ -461,7 +459,7 @@ def best_hand3(card_list2):
             score_array[3][hand_num] = score(hand3[hand_num], "3")
             logging.info((((hand_num, hand3[hand_num])), score_array[3][hand_num]))
             hand_num = hand_num + 1
-    for i in range(4):  # straight flush try#2
+    for i in range(4):  # straight flush
         if suit_rank_array[i+6][15] >0:   #sum of SF rows [6:9]
             for j in range(1, 11):
                 if suit_rank_array[i + 6][j] >= 1:
@@ -471,15 +469,6 @@ def best_hand3(card_list2):
                     score_array[3][hand_num] = score(hand3[hand_num], "3")
                     logging.info((hand_num, hand3[hand_num], score_array[3][hand_num]))
                     hand_num = hand_num + 1
-    # for i in range(4):  # straight flush try#1
-    #     for j in range(1, 11):
-    #         if suit_rank_array[i + 6][j] >= 1:
-    #             for k in range(5):
-    #                 card = suits[i] + ranks[j + k]
-    #                 hand3[hand_num].append(card)
-    #             score_array[3][hand_num] = score(hand3[hand_num], "3")
-    #             logging.info((hand_num, hand3[hand_num], score_array[3][hand_num]))
-    #             hand_num = hand_num + 1
 
     for j in range(14, 1, -1):  # fourk
         if suit_rank_array[4][j] == 4:
@@ -500,17 +489,40 @@ def best_hand3(card_list2):
             logging.info((hand_num, hand3[hand_num], score_array[3][hand_num]))
             hand_num = hand_num + 1
 
-    for i in range(4):  # flush
+    # flush have to deal with 5, 6 or > 6 cards
+    for i in range(4): # cycle through suits
         if suit_rank_array[i][15] >= 5:
-
             for card in card_list2:
                 if suits[i] in card:
                     hand3[hand_num].append(card)
-            if len(hand3[hand_num]) > 5:
+
+            if len(hand3[hand_num]) == 5:  # create one hand
+                score_array[3][hand_num] = score(hand3[hand_num], "3")
+                logging.info((hand_num, hand3[hand_num], score_array[3][hand_num]))
+                hand_num = hand_num + 1
+
+            elif len(hand3[hand_num]) == 6:  # create 6 hands
+                hand3[hand_num + 1] = list(hand3[hand_num])
+                hand3[hand_num + 2] = list(hand3[hand_num])
+                hand3[hand_num + 3] = list(hand3[hand_num])
+                hand3[hand_num + 4] = list(hand3[hand_num])
+                hand3[hand_num + 5] = list(hand3[hand_num])
+                flush_hand = list(hand3[hand_num])
+                i = 0
+                for card in flush_hand:
+                    hand3[hand_num + i].remove(card)
+                    score_array[3][hand_num+i] = score(hand3[hand_num+i], "3")
+                    logging.info((hand_num+i, hand3[hand_num+i], score_array[3][hand_num+i]))
+                    # print hand_num+i, hand3[hand_num+i]
+                    i += 1
+                hand_num = hand_num + 6
+
+            elif len(hand3[hand_num]) >= 7:  # create one hand
                 hand3[hand_num] = flush_overage(hand3[hand_num], card_list2)
-            score_array[3][hand_num] = score(hand3[hand_num], "3")
-            logging.info((hand_num, hand3[hand_num], score_array[3][hand_num]))
-            hand_num = hand_num + 1
+                score_array[3][hand_num] = score(hand3[hand_num], "3")
+                logging.info((hand_num, hand3[hand_num], score_array[3][hand_num]))
+                # print hand_num, hand3[hand_num]
+                hand_num = hand_num + 1
 
     for j in range(11, 0, -1):  # straight
         if suit_rank_array[5][j] >= 1:
@@ -581,7 +593,7 @@ def best_hand3(card_list2):
         hand_num = hand_num + 1
     return hand3
 
-def best_hand2(card_listx, score_prob):
+def best_5card_hand(card_listx, score_prob):
     ##logger.debug('Entering module')
 
     """ Given card_listx, return hand_x which is best 5 card hand"""
@@ -778,7 +790,8 @@ def best_hand2(card_listx, score_prob):
         logging.warning(("Why is hand_x empty?", hand_x))
     return (hand_x)
   
-def best_hand1(card_listx, score_prob):
+def best_3card_hand(card_listx, score_prob):
+    sorted_card_listx = sorted(card_listx, cmp=rank_sort, reverse=True)
     logging.info((card_listx, score_prob))
     if len(card_listx) == 0:
         logging.warn(("card_listx is empty, something is wrong"))
@@ -988,7 +1001,7 @@ def score(card_listx, hand):
 def score_final(card_listx, hand):   
     """ given either 3 or 5 cards, return score and prob depending on hand 1,2 or 3
         """
-    sorted_card_listx = sorted(card_listx, cmp=suit_rank_sort, reverse=True)
+    sorted_card_listx = sorted(card_listx, cmp=rank_sort, reverse=True)
     suit_rank_array = analyze (sorted_card_listx)
     suits = "SHDC"
     ranks = "0123456789TJQKA"

@@ -18,7 +18,7 @@ NUMBER_OF_HANDS = 100
 NUMBER_OF_CARDS = 13
 
 for k in range (NUMBER_OF_HANDS):
-    if k%100 == 0:
+    if k%10 == 0:
         print k
     a = Deck().deal_n_cards(NUMBER_OF_CARDS)
     card_list = a[0]
